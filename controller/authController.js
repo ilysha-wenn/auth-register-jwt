@@ -39,12 +39,12 @@ class authController{
             const user = await User.findOne({email});
             if(!user) return res.status(400).json({message:`Пользователь с ${email} не найден`});
             const validPassword = bcrypt.compareSync(password, user.password);
-            if(!validPassword) res.status(400).json({message: `Пароль ${password} не верный`});
+            if(!validPassword) return res.status(400).json({message: `Ваш пароль ${password} не верный`});
             const token = generateAccessToken(user._id, user.roles);
-            return res.json({token});
+            return res.json({message: token});
         } catch (error) {
             console.log(error);
-            res.status(400).json({message: 'Произошла ошибка авторизации'});
+            return res.status(400).json({message: 'Произошла ошибка авторизации'});
         }
     }
     async getUsers(req, res){
@@ -52,7 +52,18 @@ class authController{
             const users = await User.find();
             return res.json({users});
         } catch (error) {
-            
+            return res.status(400).json({message: "Ошибка"})
+        }
+    }
+
+    async deleteUsers(req, res){
+        try {
+            const {id} = req.params;
+            if(!id) return res.status(400).json({message: "Не указан id"});
+            const user = await User.findByIdAndDelete(id);
+            return res.status(200).json({message: "Пользователь удалён"});
+        } catch (error) {
+            return res.status(400).json({message: "Ошибка"});
         }
     }
 }
